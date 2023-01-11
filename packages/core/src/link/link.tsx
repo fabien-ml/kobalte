@@ -12,7 +12,7 @@ import {
   createPolymorphicComponent,
   mergeDefaultProps,
 } from "@kobalte/utils";
-import { JSX, splitProps } from "solid-js";
+import { JSX, onMount, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import {
@@ -23,6 +23,7 @@ import {
   CreatePressProps,
   createTagName,
 } from "../primitives";
+import { useRequiredTypography } from "../text";
 
 export interface LinkOptions extends CreatePressProps {
   /**
@@ -30,6 +31,10 @@ export interface LinkOptions extends CreatePressProps {
    * Native navigation will be disabled, and the link will be exposed as disabled to assistive technology.
    */
   isDisabled?: boolean;
+  /**
+   * Require the link to be embedded within a parent `Text` component.
+   */
+  requireParentText?: boolean;
 }
 
 /**
@@ -42,9 +47,15 @@ export const Link = createPolymorphicComponent<"a", LinkOptions>(props => {
 
   const [local, createPressProps, others] = splitProps(
     props,
-    ["as", "isDisabled", "onClick"],
+    ["as", "isDisabled", "onClick", "requireParentText"],
     CREATE_PRESS_PROP_NAMES
   );
+
+  onMount(() => {
+    if (local.requireParentText) {
+      useRequiredTypography("Link");
+    }
+  });
 
   const { isPressed, pressHandlers } = createPress<HTMLAnchorElement>(createPressProps);
 
